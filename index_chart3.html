@@ -1,0 +1,123 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Three-month average winter minimum temperature</title>
+  <meta name="description" content="Three-month average winter minimum temperature">
+  <meta name="author" content="Frey Hargarten - StarTribune">
+
+  <link href="css/c3.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/startribune_dataviz_styles.css" />
+  
+  <style>
+  #viewSwitch { text-align:center; }
+
+  #chartMonth .c3-line-statewide-trend, #chartMonth .c3-line-northwest-trend, #chartMonth .c3-line-northeast-trend, #chartMonth .c3-line-southwest-trend, #chartMonth .c3-line-southeast-trend, #chartMonth .c3-line-central-trend, #chartMonth .c3-line-northcentral-trend, #chartMonth .c3-line-south-central-trend, #chartMonth .c3-line-west-central-trend, #chartMonth .c3-line-east-central-trend, #chartColdest .c3-line-downtown-ma { stroke-width: 3px !important; }
+
+  .chartHeader { padding:12px;height:auto;text-align:center;padding-bottom:5px; }
+  .chatter { padding-left:20px;text-align:center;margin-bottom:20px; }
+  .wrapper-dropdown-1 .active { background:#ddd; }
+  .wrapper-dropdown-1 { display:inline-block;font-family:"Benton Sans",Helvetica,Arial,sans-serif;z-index:900;background:#ddd;color:#333;cursor:pointer;font-weight:bold;outline:none;padding:8px;position:relative;width:200px;border:1px solid #aaa;box-shadow:0 2px 1px rgba(0, 0, 0, 0.10);font-size:14px; }
+  .wrapper-dropdown-1 .dropdown { font-weight:normal;left:0;list-style:none;opacity:0;pointer-events:none;position:absolute;right:0;top:100%;border:1px solid #aaa;background:#fff;box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);margin-top:0px !important; }
+  ul.dropdown.months { box-sizing:border-box;margin:0;moz-box-sizing:border-box;padding:0;webkit-box-sizing:border-box;margin-top:-1px;border-radius:0 0 4px 4px;background-clip:padding-box; }
+  .wrapper-dropdown-1 .dropdown { font-weight:normal;left:0;list-style:none;opacity:0;pointer-events:none;position:absolute;right:0;top:100%;border:1px solid #aaa;background:#fff;box-shadow:0 4px 5px rgba(0, 0, 0, 0.15);margin-top:0px !important; }
+  .wrapper-dropdown-1 .dropdown li:hover a { background:#EFEFEF; }
+  header[role="banner"] { width:100%;height:40px;z-index:1000;background:#f0f0f0; }
+  .c3-tooltip th { background-color:#aaa;font-size:12px;padding:2px 5px;text-align:left;color:#FFF;font-family:"Benton Sans"; }
+  </style> 
+</head>
+
+<body>
+  <div id="wrapper">
+
+<div>
+<div class="chartHeader chartTitle">The coldest nights</div>
+<div class="chatter">The coldest temperature recorded each winter in St. Cloud compared to the Twin Cities' airport.</div>
+<div id="chartColdest" class="chart"></div>
+<!-- <div class="chartFooter">
+  <div class="sources">Source: MNDNR State Climatology Office</div>
+  <div class="branding"><a href="http://startribune.com/datadrop" target="new_">startribune.com/datadrop</a></div>
+</div> -->
+
+<!-- <p><small class="byline">Data Visualization by <a href="http://www.startribune.com/jeff-hargarten/274254381/" target="new_">Jeff Hargarten</a></small></p>
+<a href="https://docs.google.com/spreadsheets/d/1-2zKGGKgPe9Xer1MrRBI74Zy5TUi15HuZShdT-eJFFs/pub?output=xlsx" target="new_"><button class="downloadButton">&nbsp;Download data</button></a> -->
+  </div>
+</div>
+
+<script src="//code.jquery.com/jquery-latest.js"></script>
+<script src="js/d3.v3.min.js"></script>
+<script src="js/c3.min.js"></script> 
+
+<script>
+d3.json("./data/coldest_winter_temp.json", function(error, dataLoadColdest) {
+
+var dataColdest = dataLoadColdest.coldest_winter_temp;
+
+var  padding = {
+        top: 20,
+        right: 40,
+        bottom: 20,
+        left: 40,
+    };
+
+//COLDEST TEMPS
+var chartColdest = c3.generate({
+        bindto: '#chartColdest',
+        size: { height: 350 },
+        padding: padding,
+        data: {
+            json: dataColdest,
+            keys: {
+                x: 'year',
+                value: ['downtown_min','stcloud_min','downtown_ma']
+                 // value: ['statewide','northwest','northeast','southwest','southeast','south-central','north-central','east-central','central']
+            },
+            names: {
+              'downtown_min': 'Downtown Minneapolis/Airport',
+              'stcloud_min': 'St. Cloud',
+              'downtown_ma': '7-year Moving Average'
+            },
+            types: {
+            'downtown_min': 'line',
+            'stcloud_min': 'line',
+            'downtown_ma': 'spline'
+            }
+        },
+        line: {
+          connectNull: true
+        },
+        axis: {
+          y: {
+            tick: {
+             format: d3.format('r')
+            }
+        },
+        x: {
+            type: 'category',
+            // values: ['1901-1902', '1930-1931', '1959-1960', '1987-1988'],
+            tick: {
+                // format: '%Y',
+                count: 6,
+                multiline: false
+            }
+          }
+        },
+      subchart: { show: false },
+        color: { pattern: ['#000',"#bbb","#9C0004"] },
+    });
+
+d3.select("#chartColdest svg .c3-chart-lines").append("line")          // attach a line
+    .style("stroke", "black")  // colour the line
+    .attr("x1", 0)     // x position of the first end of the line
+    .attr("y1", -31)      // y position of the first end of the line
+    .attr("x2", 300)     // x position of the second end of the line
+    .attr("y2", -14); 
+
+
+});
+</script>
+</body>
+</html>
